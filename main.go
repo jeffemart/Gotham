@@ -3,9 +3,11 @@ package main
 import (
 	"fmt"
 	"log"
+	"net/http"
 
 	"github.com/jeffemart/Gotham/database"
 	"github.com/jeffemart/Gotham/migrations"
+	"github.com/jeffemart/Gotham/routes"
 	"github.com/jeffemart/Gotham/settings"
 )
 
@@ -26,7 +28,15 @@ func main() {
 	database.Connect()
 
 	// Executar a migração
-	migrations.Run()
+	if err := migrations.Run(); err != nil {
+		log.Fatalf("Erro ao executar migração: %v", err)
+	}
 
-	log.Println("Migração concluída com sucesso!")
+	log.Println("Migração concluída e conexão fechada com sucesso!")
+
+	// Configurar rotas
+	router := routes.SetupRoutes()
+
+	log.Println("Servidor iniciado na porta 5000...")
+	log.Fatal(http.ListenAndServe(":5000", router))
 }
