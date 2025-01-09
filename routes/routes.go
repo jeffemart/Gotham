@@ -1,22 +1,32 @@
 package routes
 
 import (
-	"net/http"
-
-	"github.com/jeffemart/Gotham/handlers"
-
 	"github.com/gorilla/mux"
+	"github.com/jeffemart/Gotham/handlers"
+	"github.com/jeffemart/Gotham/middlewares"
 )
 
-// SetupRoutes configura as rotas para a aplicação
 func SetupRoutes() *mux.Router {
 	router := mux.NewRouter()
 
-	// Rotas de usuário
-	router.HandleFunc("/users", handlers.CreateUser).Methods(http.MethodPost)
-	router.HandleFunc("/users/{id}", handlers.GetUser).Methods(http.MethodGet)
-	router.HandleFunc("/users/{id}", handlers.UpdateUser).Methods(http.MethodPut)
-	router.HandleFunc("/users/{id}", handlers.DeleteUser).Methods(http.MethodDelete)
+	// Rotas públicas
+	router.HandleFunc("/users", handlers.GetUsers).Methods("GET")
+	router.HandleFunc("/users/{id:[0-9]+}", handlers.GetUser).Methods("GET")
+
+	// Rota de login (pública)
+	router.HandleFunc("/login", handlers.Login).Methods("POST")
+	
+	// Rotas protegidas (somente para administradores)
+	adminRoutes := router.PathPrefix("/admin").Subrouter()
+	adminRoutes.Use(middlewares.RoleMiddleware("admin"))
+	adminRoutes.HandleFunc("/users", handlers.CreateUser).Methods("POST")
+	adminRoutes.HandleFunc("/users/{id:[0-9]+}", handlers.UpdateUser).Methods("PUT")
+	adminRoutes.HandleFunc("/users/{id:[0-9]+}", handlers.DeleteUser).Methods("DELETE")
+
+	// Rotas para qualquer usuário autenticado (como exemplo, apenas admin ou agente podem acessar)
+	protectedRoutes := router.PathPrefix("/protected").Subrouter()
+	protectedRoutes.Use(middlewares.RoleMiddleware("admin", "agente"))
+	protectedRoutes.HandleFunc("/tasks", handlers.GetTasks).Methods("GET")
 
 	return router
 }
