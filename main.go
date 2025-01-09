@@ -37,6 +37,6 @@ func main() {
 	// Configurar rotas
 	router := routes.SetupRoutes()
 
-	log.Println("Servidor iniciado na porta 5000...")
-	log.Fatal(http.ListenAndServe(":5000", router))
+	log.Println("Servidor iniciado na porta 8000...")
+	log.Fatal(http.ListenAndServe(":8000", router))
 }
