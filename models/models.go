@@ -12,3 +12,14 @@ type User struct {
 	CreatedAt time.Time `gorm:"autoCreateTime"`
 	UpdatedAt time.Time `gorm:"autoUpdateTime"`
 }
+
+// LoginRequest estrutura para dados de login
+type LoginRequest struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
+
+// RefreshRequest estrutura para dados de refresh token
+type RefreshRequest struct {
+	RefreshToken string `json:"refresh_token"`
+}
