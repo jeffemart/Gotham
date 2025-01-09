@@ -8,12 +8,19 @@ import (
 )
 
 // Run executa a migração do banco de dados
-func Run() {
-	// Migrar a tabela User
-	err := database.DB.AutoMigrate(&models.User{})
-	if err != nil {
-		log.Fatalf("Erro ao migrar a tabela: %v", err)
+// Run executa as migrações do banco de dados
+func Run() error {
+	// Obter a instância do banco de dados
+	db := database.DB
+
+	log.Println("Iniciando migrações...")
+
+	// Executar a migração da tabela `users`
+	if err := db.AutoMigrate(&models.User{}); err != nil {
+		log.Printf("Erro ao executar migração da tabela `users`: %v\n", err)
+		return err
 	}
 
-	log.Println("Tabela 'users' criada com sucesso!")
+	log.Println("Migrações concluídas com sucesso!")
+	return nil
 }
