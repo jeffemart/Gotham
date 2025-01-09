@@ -2,6 +2,10 @@ package main
 
 import (
 	"fmt"
+	"log"
+
+	"github.com/jeffemart/Gotham/database"
+	"github.com/jeffemart/Gotham/migrations"
 	"github.com/jeffemart/Gotham/settings"
 )
 
@@ -18,5 +22,11 @@ func main() {
 		config.Database.User,
 	)
 
-	// A partir daqui, você pode usar essas configurações para conectar ao banco, Redis, etc.
+	// Conectar ao banco de dados
+	database.Connect()
+
+	// Executar a migração
+	migrations.Run()
+
+	log.Println("Migração concluída com sucesso!")
 }
