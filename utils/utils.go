@@ -1,7 +1,6 @@
 package utils
 
 import (
-	"context"
 	"fmt"
 	"os"
 	"time"
@@ -12,26 +11,8 @@ import (
 	"github.com/jeffemart/Gotham/database"
 )
 
-// Contexto para uso com Redis
-var ctx = context.Background()
-
-// Inicializar cliente Redis
-var RedisClient = redis.NewClient(&redis.Options{
-	Addr:     os.Getenv("REDIS_HOST") + ":" + os.Getenv("REDIS_PORT"),
-	Password: os.Getenv("REDIS_PASSWORD"), // Deixe vazio se não houver senha
-	DB:       0,                          // Banco padrão
-})
-
 // Define a chave secreta (deve ser configurada como variável de ambiente)
 var secretKey = []byte(os.Getenv("APP_KEY"))
-
-// Claims personalizados para incluir a role do usuário
-type Claims struct {
-	Email  string `json:"email"`
-	RoleID uint   `json:"role_id"` // Agora armazenamos o ID da role, ao invés do nome
-	Permissions []string `json:"permissions"`
-	jwt.StandardClaims
-}
 
 // Defina um tipo específico para a chave no contexto
 type RoleKeyType string
@@ -40,34 +21,61 @@ type RoleKeyType string
 // Isso será usado para armazenar os Claims no contexto
 const RoleKey RoleKeyType = "RoleKey"
 
+// Claims personalizados para incluir a role do usuário
+type Claims struct {
+	Email      string   `json:"email"`
+	RoleID     uint     `json:"role_id"`
+	Permissions []string `json:"permissions"`
+	jwt.StandardClaims
+}
+
+// Função para salvar o token no Redis com expiração
+func SaveTokenToRedis(tokenString string, expiration time.Duration) error {
+	// Salvando o token no Redis com um valor e TTL (expiração)
+	err := database.RedisClient.Set(database.Ctx, tokenString, "valid", expiration).Err()
+	if err != nil {
+		return fmt.Errorf("erro ao salvar token no Redis: %v", err)
+	}
+	return nil
+}
+
 // GenerateTokenWithPermissions gera um token JWT com as permissões do usuário
-// Função para gerar um novo token JWT com permissões
 func GenerateTokenWithPermissions(user models.User) (string, error) {
-    // Carregar a role do usuário e suas permissões
-    var role models.Role
-    if err := database.DB.Preload("Permissions").First(&role, user.RoleID).Error; err != nil {
-        return "", fmt.Errorf("erro ao buscar role do usuário: %v", err)
-    }
+	// Carregar a role do usuário e suas permissões
+	var role models.Role
+	if err := database.DB.Preload("Permissions").First(&role, user.RoleID).Error; err != nil {
+		return "", fmt.Errorf("erro ao buscar role do usuário: %v", err)
+	}
 
-    // Criar uma lista de permissões
-    var permissions []string
-    for _, permission := range role.Permissions {
-        permissions = append(permissions, permission.Name)
-    }
+	// Criar uma lista de permissões
+	var permissions []string
+	for _, permission := range role.Permissions {
+		permissions = append(permissions, permission.Name)
+	}
 
-    // Definir as claims do token
-    claims := Claims{
-        Email:       user.Email,
-        RoleID:      role.ID,
-        Permissions: permissions,
-        StandardClaims: jwt.StandardClaims{
-            ExpiresAt: time.Now().Add(time.Hour * 24).Unix(),
-        },
-    }
+	// Definir as claims do token
+	claims := Claims{
+		Email:       user.Email,
+		RoleID:      role.ID,
+		Permissions: permissions,
+		StandardClaims: jwt.StandardClaims{
+			ExpiresAt: time.Now().Add(time.Hour * 24).Unix(),
+		},
+	}
 
-    // Gerar o token JWT
-    token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-    return token.SignedString(secretKey)
+	// Gerar o token JWT
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	tokenString, err := token.SignedString(secretKey)
+	if err != nil {
+		return "", fmt.Errorf("erro ao assinar o token: %v", err)
+	}
+
+	// Salvar o token no Redis com TTL de 24 horas
+	if err := SaveTokenToRedis(tokenString, time.Hour*24); err != nil {
+		return "", err
+	}
+
+	return tokenString, nil
 }
 
 // Função para fazer o parse e validação do token JWT
@@ -104,7 +112,7 @@ func ValidateToken(tokenString string) (*Claims, error) {
 	}
 
 	// Verifica no Redis se o token ainda é válido
-	redisValue, err := RedisClient.Get(ctx, tokenString).Result()
+	redisValue, err := database.RedisClient.Get(database.Ctx, tokenString).Result()
 	if err == redis.Nil || redisValue != "valid" {
 		return nil, fmt.Errorf("token revogado ou inválido")
 	}
@@ -114,18 +122,9 @@ func ValidateToken(tokenString string) (*Claims, error) {
 
 // Função para revogar o token, removendo-o do Redis
 func RevokeToken(tokenString string) error {
-	err := RedisClient.Del(ctx, tokenString).Err()
+	err := database.RedisClient.Del(database.Ctx, tokenString).Err()
 	if err != nil {
 		return fmt.Errorf("erro ao revogar token: %v", err)
 	}
 	return nil
-}
-
-// Função para verificar se o token expirou (para uso interno)
-func TokenExpired(token *jwt.Token) bool {
-	claims, ok := token.Claims.(*Claims)
-	if !ok {
-		return true
-	}
-	return claims.ExpiresAt < time.Now().Unix()
 }
