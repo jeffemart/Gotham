@@ -12,6 +12,7 @@ func SetupRoutes() *mux.Router {
 	// Rotas públicas
 	router.HandleFunc("/users", handlers.GetUsers).Methods("GET")
 	router.HandleFunc("/users/{id:[0-9]+}", handlers.GetUser).Methods("GET")
+	router.HandleFunc("/users", handlers.CreateUser).Methods("POST")
 
 	// Rota de login (pública)
 	router.HandleFunc("/login", handlers.Login).Methods("POST")
@@ -19,7 +20,7 @@ func SetupRoutes() *mux.Router {
 	// Rotas protegidas (somente para administradores)
 	adminRoutes := router.PathPrefix("/admin").Subrouter()
 	adminRoutes.Use(middlewares.RoleMiddleware("admin"))
-	adminRoutes.HandleFunc("/users", handlers.CreateUser).Methods("POST")
+	// adminRoutes.HandleFunc("/users", handlers.CreateUser).Methods("POST")
 	adminRoutes.HandleFunc("/users/{id:[0-9]+}", handlers.UpdateUser).Methods("PUT")
 	adminRoutes.HandleFunc("/users/{id:[0-9]+}", handlers.DeleteUser).Methods("DELETE")
 
