@@ -9,6 +9,7 @@ import (
 	"github.com/dgrijalva/jwt-go"
 	"github.com/go-redis/redis/v8"
 	"github.com/jeffemart/Gotham/models"
+	"github.com/jeffemart/Gotham/database"
 )
 
 // Contexto para uso com Redis
@@ -26,35 +27,47 @@ var secretKey = []byte(os.Getenv("APP_KEY"))
 
 // Claims personalizados para incluir a role do usuário
 type Claims struct {
-	Email string `json:"email"`
-	Role  string `json:"role"`
+	Email  string `json:"email"`
+	RoleID uint   `json:"role_id"` // Agora armazenamos o ID da role, ao invés do nome
+	Permissions []string `json:"permissions"`
 	jwt.StandardClaims
 }
 
-// Função para gerar um novo token JWT
-func GenerateToken(user models.User) (string, error) {
-	claims := Claims{
-		Email: user.Email,
-		Role:  user.Role,
-		StandardClaims: jwt.StandardClaims{
-			Issuer:    "GothamApp",
-			ExpiresAt: time.Now().Add(24 * time.Hour).Unix(),
-		},
-	}
+// Defina um tipo específico para a chave no contexto
+type RoleKeyType string
 
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	tokenString, err := token.SignedString(secretKey)
-	if err != nil {
-		return "", err
-	}
+// Defina a chave com o valor apropriado para evitar colisões
+// Isso será usado para armazenar os Claims no contexto
+const RoleKey RoleKeyType = "RoleKey"
 
-	// Armazena o token no Redis com o mesmo tempo de expiração
-	err = RedisClient.Set(ctx, tokenString, "valid", 24*time.Hour).Err()
-	if err != nil {
-		return "", fmt.Errorf("erro ao salvar token no Redis: %v", err)
-	}
+// GenerateTokenWithPermissions gera um token JWT com as permissões do usuário
+// Função para gerar um novo token JWT com permissões
+func GenerateTokenWithPermissions(user models.User) (string, error) {
+    // Carregar a role do usuário e suas permissões
+    var role models.Role
+    if err := database.DB.Preload("Permissions").First(&role, user.RoleID).Error; err != nil {
+        return "", fmt.Errorf("erro ao buscar role do usuário: %v", err)
+    }
 
-	return tokenString, nil
+    // Criar uma lista de permissões
+    var permissions []string
+    for _, permission := range role.Permissions {
+        permissions = append(permissions, permission.Name)
+    }
+
+    // Definir as claims do token
+    claims := Claims{
+        Email:       user.Email,
+        RoleID:      role.ID,
+        Permissions: permissions,
+        StandardClaims: jwt.StandardClaims{
+            ExpiresAt: time.Now().Add(time.Hour * 24).Unix(),
+        },
+    }
+
+    // Gerar o token JWT
+    token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+    return token.SignedString(secretKey)
 }
 
 // Função para fazer o parse e validação do token JWT

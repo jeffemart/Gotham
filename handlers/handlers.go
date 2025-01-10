@@ -22,7 +22,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var user models.User
-	result := database.DB.Where("email = ?", loginRequest.Email).First(&user)
+	result := database.DB.Where("email = ?", loginRequest.Email).Preload("Role.Permissions").First(&user)
 	if result.Error != nil {
 		http.Error(w, "Usuário não encontrado", http.StatusUnauthorized)
 		return
@@ -35,8 +35,8 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Gera o token JWT
-	token, err := utils.GenerateToken(user)
+	// Gera o token JWT com as permissões do papel do usuário
+	token, err := utils.GenerateTokenWithPermissions(user)
 	if err != nil {
 		http.Error(w, "Erro ao gerar token", http.StatusInternalServerError)
 		return
@@ -71,7 +71,7 @@ func RefreshToken(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	token, err := utils.GenerateToken(user)
+	token, err := utils.GenerateTokenWithPermissions(user)
 	if err != nil {
 		http.Error(w, "Erro ao gerar novo token", http.StatusInternalServerError)
 		return

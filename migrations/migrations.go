@@ -16,7 +16,7 @@ func Run() error {
 	log.Println("Iniciando migrações...")
 
 	// Executar a migração da tabela `users`
-	if err := db.AutoMigrate(&models.User{}); err != nil {
+	if err := db.AutoMigrate(&models.User{}, &models.Role{}, &models.Permission{}, &models.RolePermission{}); err != nil {
 		log.Printf("Erro ao executar migração da tabela `users`: %v\n", err)
 		return err
 	}
