@@ -1,0 +1,20 @@
+# Ignorar arquivos temporários do sistema
+*.swp
+*.tmp
+*.log
+
+# Ignorar arquivos e pastas específicas
+node_modules
+build/
+dist/
+.vscode/
+.idea/
+*.env
+
+# Ignorar arquivos relacionados ao Git
+.git
+.gitignore
+
+# Ignorar arquivos Docker
+.dockerignore
+Dockerfile*

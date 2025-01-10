@@ -4,22 +4,37 @@ import "time"
 
 // User representa um usuário no banco de dados
 type User struct {
-	ID        uint      `gorm:"primaryKey"`
-	Name      string    `gorm:"size:255;not null"`
-	Email     string    `gorm:"size:255;not null;unique"`
-	Password  string    `gorm:"size:255;not null"`
-	Role      string    `gorm:"size:20;not null;check:role IN ('cliente', 'agente', 'admin')"`
-	CreatedAt time.Time `gorm:"autoCreateTime"`
-	UpdatedAt time.Time `gorm:"autoUpdateTime"`
+    ID        uint      `gorm:"primaryKey"`
+    Name      string    `gorm:"size:255;not null"`
+    Email     string    `gorm:"size:255;not null;unique"`
+    Password  string    `gorm:"size:255;not null"`
+    RoleID    uint      `gorm:"not null"`
+    Role      Role      `gorm:"foreignKey:RoleID"`
+    CreatedAt time.Time `gorm:"autoCreateTime"`
+    UpdatedAt time.Time `gorm:"autoUpdateTime"`
 }
 
-// LoginRequest estrutura para dados de login
+type Role struct {
+    ID          uint         `gorm:"primaryKey"`
+    Name        string       `gorm:"size:255;not null;unique"`
+    Permissions []Permission `gorm:"many2many:role_permissions"`
+}
+
+type Permission struct {
+    ID   uint   `gorm:"primaryKey"`
+    Name string `gorm:"size:255;not null;unique"`
+}
+
+type RolePermission struct {
+    RoleID       uint `gorm:"primaryKey"`
+    PermissionID uint `gorm:"primaryKey"`
+}
+
 type LoginRequest struct {
-	Email    string `json:"email"`
-	Password string `json:"password"`
+    Email    string `json:"email"`
+    Password string `json:"password"`
 }
 
-// RefreshRequest estrutura para dados de refresh token
 type RefreshRequest struct {
-	RefreshToken string `json:"refresh_token"`
+    RefreshToken string `json:"refresh_token"`
 }
