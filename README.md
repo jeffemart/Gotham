@@ -7,10 +7,13 @@ Gotham é uma aplicação construída em Go, utilizando PostgreSQL como banco de
 ```
 Gotham/
 ├── app/
+│   ├── database/
 │   ├── handlers/
 │   ├── middlewares/
+│   ├── migrations/
 │   ├── models/
 │   ├── routes/
+│   ├── settings/
 │   ├── utils/
 │   └── main.go
 ├── docker-compose.yml
@@ -41,7 +44,12 @@ Crie um arquivo `.env` na raiz do projeto com o seguinte conteúdo:
 
 ```
 # Variáveis para a aplicação Go
+APP_NAME=Gotham
+APP_ENV=local
+APP_KEY=
 APP_PORT=8000
+APP_DEBUG=true
+APP_URL=http://localhost
 
 # Variáveis para o Postgres
 POSTGRES_USER=user
@@ -104,7 +112,7 @@ Utilize ferramentas como [Postman](https://www.postman.com/) ou [cURL](https://c
 ```bash
 curl -X POST http://localhost:8000/login \
   -H "Content-Type: application/json" \
-  -d '{"username": "admin", "password": "admin"}'
+  -d '{"email": "admin@example.com", "password": "admin123"}'
 ```
 
 #### Criar Usuário (Admin)
