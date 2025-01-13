@@ -169,23 +169,71 @@ func GetUser(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(user)
 }
 
-// GetUsers retorna todos os usuários cadastrados
-// @Summary Retorna todos os usuários
-// @Description Obtém uma lista de todos os usuários cadastrados no sistema
+// GetUsers retorna todos os usuários cadastrados com paginação
+// @Summary Retorna todos os usuários com paginação
+// @Description Obtém uma lista de todos os usuários cadastrados no sistema com base na paginação
 // @Produce  json
-// @Success 200 {array} models.User "Lista de usuários"
+// @Param page query int false "Número da página" default(1)
+// @Param limit query int false "Limite de usuários por página" default(10)
+// @Success 200 {object} utils.PaginatedResponse "Lista de usuários com paginação"
 // @Failure 500 {string} string "Erro ao buscar usuários"
 // @Router /users [get]
 func GetUsers(w http.ResponseWriter, r *http.Request) {
+	// Pega os parâmetros de query (página e limite)
+	pageStr := r.URL.Query().Get("page")
+	limitStr := r.URL.Query().Get("limit")
+
+	// Definir página e limite com valores padrão
+	page := 1
+	if pageStr != "" {
+		page, _ = strconv.Atoi(pageStr)
+		if page < 1 {
+			page = 1
+		}
+	}
+
+	limit := 10
+	if limitStr != "" {
+		limit, _ = strconv.Atoi(limitStr)
+		if limit < 1 {
+			limit = 10
+		}
+	}
+
+	// Calcula o deslocamento (offset) baseado na página e no limite
+	offset := (page - 1) * limit
+
+	// Contagem total de usuários
+	var totalCount int64
+	if err := database.DB.Model(&models.User{}).Count(&totalCount).Error; err != nil {
+		http.Error(w, "Erro ao contar usuários", http.StatusInternalServerError)
+		return
+	}
+
+	// Consultar usuários com limite e offset para paginação
 	var users []models.User
-	result := database.DB.Find(&users)
-	if result.Error != nil {
+	if err := database.DB.Limit(limit).Offset(offset).Find(&users).Error; err != nil {
 		http.Error(w, "Erro ao buscar usuários", http.StatusInternalServerError)
 		return
 	}
 
+	// Calcula o número total de páginas
+	totalPages := int((totalCount + int64(limit) - 1) / int64(limit))
+
+	// Monta a resposta paginada
+	response := utils.PaginatedResponse{
+		Status:      http.StatusOK,
+		Message:     "Usuários encontrados",
+		Data:        users,
+		TotalCount:  int(totalCount),
+		TotalPages:  totalPages,
+		CurrentPage: page,
+		Limit:       limit,
+	}
+
+	// Retorna a resposta como JSON
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(users)
+	json.NewEncoder(w).Encode(response)
 }
 
 // UpdateUser atualiza as informações de um usuário

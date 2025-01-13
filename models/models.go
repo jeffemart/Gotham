@@ -38,3 +38,13 @@ type LoginRequest struct {
 type RefreshRequest struct {
 	RefreshToken string `json:"refresh_token"`
 }
+
+type PaginatedResponse struct {
+	Status      int         `json:"status"`
+	Message     string      `json:"message"`
+	Data        interface{} `json:"data"`
+	TotalCount  int         `json:"total_count"`
+	TotalPages  int         `json:"total_pages"`
+	CurrentPage int         `json:"current_page"`
+	Limit       int         `json:"limit"`
+}
