@@ -14,6 +14,15 @@ import (
 )
 
 // Login autentica o usuário e gera um token JWT
+// @Summary Login do usuário
+// @Description Autentica o usuário e gera um token JWT
+// @Accept  json
+// @Produce  json
+// @Param loginRequest body models.LoginRequest true "Credenciais do usuário"
+// @Success 200 {object} map[string]string "Token gerado"
+// @Failure 400 {string} string "Dados inválidos"
+// @Failure 401 {string} string "Usuário não encontrado ou senha incorreta"
+// @Router /login [post]
 func Login(w http.ResponseWriter, r *http.Request) {
 	var loginRequest models.LoginRequest
 	if err := json.NewDecoder(r.Body).Decode(&loginRequest); err != nil {
@@ -49,6 +58,16 @@ func Login(w http.ResponseWriter, r *http.Request) {
 }
 
 // RefreshToken gera um novo token JWT usando o refresh token
+// @Summary Gera um novo token JWT usando o refresh token
+// @Description Gera um novo token JWT quando fornecido um refresh token válido
+// @Accept  json
+// @Produce  json
+// @Param refreshRequest body models.RefreshRequest true "Refresh Token"
+// @Success 200 {object} map[string]string "Novo token gerado"
+// @Failure 400 {string} string "Dados inválidos"
+// @Failure 401 {string} string "Refresh token inválido"
+// @Failure 404 {string} string "Usuário não encontrado"
+// @Router /refresh_token [post]
 func RefreshToken(w http.ResponseWriter, r *http.Request) {
 	var refreshRequest models.RefreshRequest
 	if err := json.NewDecoder(r.Body).Decode(&refreshRequest); err != nil {
@@ -84,6 +103,15 @@ func RefreshToken(w http.ResponseWriter, r *http.Request) {
 }
 
 // CreateUser cria um novo usuário
+// @Summary Cria um novo usuário
+// @Description Cria um novo usuário no sistema com os dados fornecidos
+// @Accept  json
+// @Produce  json
+// @Param user body models.User true "Dados do novo usuário"
+// @Success 201 {object} models.User "Usuário criado com sucesso"
+// @Failure 400 {string} string "Dados inválidos"
+// @Failure 500 {string} string "Erro ao criar usuário"
+// @Router /users [post]
 func CreateUser(w http.ResponseWriter, r *http.Request) {
 	var user models.User
 	// Decodifica o corpo da requisição para o objeto user
@@ -115,6 +143,14 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 }
 
 // GetUser retorna um usuário pelo ID
+// @Summary Retorna um usuário pelo ID
+// @Description Obtém um usuário específico com base no ID fornecido
+// @Produce  json
+// @Param id path int true "ID do usuário"
+// @Success 200 {object} models.User "Usuário encontrado"
+// @Failure 400 {string} string "ID inválido"
+// @Failure 404 {string} string "Usuário não encontrado"
+// @Router /users/{id} [get]
 func GetUser(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	id, err := strconv.Atoi(params["id"])
@@ -134,6 +170,12 @@ func GetUser(w http.ResponseWriter, r *http.Request) {
 }
 
 // GetUsers retorna todos os usuários cadastrados
+// @Summary Retorna todos os usuários
+// @Description Obtém uma lista de todos os usuários cadastrados no sistema
+// @Produce  json
+// @Success 200 {array} models.User "Lista de usuários"
+// @Failure 500 {string} string "Erro ao buscar usuários"
+// @Router /users [get]
 func GetUsers(w http.ResponseWriter, r *http.Request) {
 	var users []models.User
 	result := database.DB.Find(&users)
@@ -147,6 +189,17 @@ func GetUsers(w http.ResponseWriter, r *http.Request) {
 }
 
 // UpdateUser atualiza as informações de um usuário
+// @Summary Atualiza as informações de um usuário
+// @Description Atualiza os dados de um usuário com base no ID fornecido
+// @Accept  json
+// @Produce  json
+// @Param id path int true "ID do usuário"
+// @Param user body models.User true "Dados do usuário a serem atualizados"
+// @Success 200 {object} models.User "Usuário atualizado com sucesso"
+// @Failure 400 {string} string "ID ou dados inválidos"
+// @Failure 404 {string} string "Usuário não encontrado"
+// @Failure 500 {string} string "Erro ao atualizar usuário"
+// @Router /users/{id} [put]
 func UpdateUser(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	id, err := strconv.Atoi(params["id"])
@@ -174,6 +227,13 @@ func UpdateUser(w http.ResponseWriter, r *http.Request) {
 }
 
 // DeleteUser remove um usuário pelo ID
+// @Summary Remove um usuário pelo ID
+// @Description Exclui um usuário com base no ID fornecido
+// @Param id path int true "ID do usuário"
+// @Success 200 {object} map[string]string "Usuário excluído com sucesso"
+// @Failure 400 {string} string "ID inválido"
+// @Failure 500 {string} string "Erro ao excluir usuário"
+// @Router /users/{id} [delete]
 func DeleteUser(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	id, err := strconv.Atoi(params["id"])
@@ -193,6 +253,11 @@ func DeleteUser(w http.ResponseWriter, r *http.Request) {
 }
 
 // GetTasks retorna uma lista de tarefas fictícias
+// @Summary Retorna uma lista de tarefas
+// @Description Obtém uma lista de tarefas fictícias para a demonstração
+// @Produce  json
+// @Success 200 {array} map[string]string "Lista de tarefas"
+// @Router /protected/tasks [get]
 func GetTasks(w http.ResponseWriter, r *http.Request) {
 	// Lista fictícia de tarefas
 	tasks := []map[string]string{

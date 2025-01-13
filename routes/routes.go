@@ -4,13 +4,33 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/jeffemart/Gotham/handlers"
 	"github.com/jeffemart/Gotham/middlewares"
+	"github.com/rs/cors"
+	httpSwagger "github.com/swaggo/http-swagger"
+	_ "github.com/jeffemart/Gotham/docs"
 )
 
 func SetupRoutes() *mux.Router {
+	// Configurar CORS com a biblioteca
+	c := cors.New(cors.Options{
+		AllowedOrigins: []string{
+			"http://localhost:8080", // Permitindo o acesso do localhost:8080
+			"http://localhost:8000", // Permitindo o acesso do localhost:8000
+			"http://localhost",      // Permitindo o acesso do localhost
+			"http://127.0.0.1",      // Permitindo o acesso de 127.0.0.1
+		},
+		AllowedMethods: []string{
+			"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS",
+		},
+		AllowedHeaders: []string{
+			"Content-Type", "Authorization", "X-Requested-With",
+		},
+		AllowCredentials: true,
+	})
+	
 	router := mux.NewRouter()
 
-	// Aplicar o middleware de CORS globalmente
-	router.Use(middlewares.CORSMiddleware)
+	// Aplicar o middleware CORS
+	router.Use(c.Handler)
 
 	// Rotas públicas
 	router.HandleFunc("/users", handlers.GetUsers).Methods("GET")
@@ -19,6 +39,9 @@ func SetupRoutes() *mux.Router {
 
 	// Rota de login (pública)
 	router.HandleFunc("/login", handlers.Login).Methods("POST")
+
+	// Adicionando a rota Swagger para documentação
+	router.Handle("/swagger/{any:.*}", httpSwagger.WrapHandler)
 
 	// Rotas protegidas (somente para administradores)
 	adminRoutes := router.PathPrefix("/admin").Subrouter()
