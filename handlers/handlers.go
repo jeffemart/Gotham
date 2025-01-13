@@ -221,7 +221,7 @@ func GetUsers(w http.ResponseWriter, r *http.Request) {
 	totalPages := int((totalCount + int64(limit) - 1) / int64(limit))
 
 	// Monta a resposta paginada
-	response := utils.PaginatedResponse{
+	response := models.PaginatedResponse{
 		Status:      http.StatusOK,
 		Message:     "Usuários encontrados",
 		Data:        users,
