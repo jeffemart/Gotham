@@ -7,8 +7,8 @@ import (
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/go-redis/redis/v8"
-	"github.com/jeffemart/Gotham/models"
 	"github.com/jeffemart/Gotham/database"
+	"github.com/jeffemart/Gotham/models"
 )
 
 // Define a chave secreta (deve ser configurada como variável de ambiente)
@@ -23,8 +23,8 @@ const RoleKey RoleKeyType = "RoleKey"
 
 // Claims personalizados para incluir a role do usuário
 type Claims struct {
-	Email      string   `json:"email"`
-	RoleID     uint     `json:"role_id"`
+	Email       string   `json:"email"`
+	RoleID      uint     `json:"role_id"`
 	Permissions []string `json:"permissions"`
 	jwt.StandardClaims
 }
