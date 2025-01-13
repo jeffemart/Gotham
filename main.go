@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"net/http"
+
 	"golang.org/x/crypto/bcrypt"
 
 	"github.com/jeffemart/Gotham/database"

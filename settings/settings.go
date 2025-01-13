@@ -8,6 +8,14 @@ import (
 
 // Config estrutura que contém as configurações do projeto
 type Config struct {
+	App struct {
+		Name  string // Nome do aplicativo
+		Env   string // Ambiente do aplicativo (local, staging, production)
+		Key   string // Chave de criptografia
+		Port  string // Porta do servidor
+		Debug bool   // Ativar ou desativar o modo de depuração
+		URL   string // URL base do aplicativo
+	}
 	Database struct {
 		Driver   string // Driver do banco de dados (e.g., postgres, mysql, mongo)
 		Host     string
@@ -27,6 +35,14 @@ type Config struct {
 // LoadSettings carrega as configurações das variáveis de ambiente
 func LoadSettings() *Config {
 	config := &Config{}
+
+	// Configurações do aplicativo
+	config.App.Name = getEnv("APP_NAME", "Gotham")
+	config.App.Env = getEnv("APP_ENV", "local")
+	config.App.Key = getEnv("APP_KEY", "")
+	config.App.Port = getEnv("APP_PORT", "8000")
+	config.App.Debug = getEnvAsBool("APP_DEBUG", true)
+	config.App.URL = getEnv("APP_URL", "http://localhost")
 
 	// Configurações do banco de dados
 	config.Database.Driver = getEnv("DB_DRIVER", "postgres")
@@ -64,6 +80,22 @@ func getEnvAsInt(key string, defaultValue int) int {
 	_, err := fmt.Sscanf(valueStr, "%d", &value)
 	if err != nil {
 		log.Printf("Erro ao converter %s para inteiro: %v. Usando valor padrão: %d", key, err, defaultValue)
+		return defaultValue
+	}
+	return value
+}
+
+// Função auxiliar para obter variáveis de ambiente como booleano
+func getEnvAsBool(key string, defaultValue bool) bool {
+	valueStr := getEnv(key, "")
+	if valueStr == "" {
+		return defaultValue
+	}
+
+	var value bool
+	_, err := fmt.Sscanf(valueStr, "%t", &value)
+	if err != nil {
+		log.Printf("Erro ao converter %s para booleano: %v. Usando valor padrão: %t", key, err, defaultValue)
 		return defaultValue
 	}
 	return value
