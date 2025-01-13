@@ -192,6 +192,7 @@ func GetUsers(w http.ResponseWriter, r *http.Request) {
 // @Summary Atualiza as informações de um usuário
 // @Description Atualiza os dados de um usuário com base no ID fornecido
 // @Accept  json
+// @Security BearerAuth
 // @Produce  json
 // @Param id path int true "ID do usuário"
 // @Param user body models.User true "Dados do usuário a serem atualizados"
@@ -199,7 +200,7 @@ func GetUsers(w http.ResponseWriter, r *http.Request) {
 // @Failure 400 {string} string "ID ou dados inválidos"
 // @Failure 404 {string} string "Usuário não encontrado"
 // @Failure 500 {string} string "Erro ao atualizar usuário"
-// @Router /users/{id} [put]
+// @Router /admin/users/{id} [put]
 func UpdateUser(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	id, err := strconv.Atoi(params["id"])
@@ -214,26 +215,55 @@ func UpdateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user.ID = uint(id)
-	user.UpdatedAt = time.Now()
-	result := database.DB.Save(&user)
+	// Carrega o usuário do banco de dados
+	var existingUser models.User
+	result := database.DB.First(&existingUser, id)
+	if result.Error != nil {
+		http.Error(w, "Usuário não encontrado", http.StatusNotFound)
+		return
+	}
+
+	// Atualiza os campos fornecidos na requisição, se não forem os valores padrão (zero)
+	if user.Email != "" && user.Email != existingUser.Email {
+		existingUser.Email = user.Email
+	}
+	if user.Name != "" && user.Name != existingUser.Name {
+		existingUser.Name = user.Name
+	}
+	if user.Password != "" { // Criptografa a senha se fornecida
+		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
+		if err != nil {
+			http.Error(w, "Erro ao criptografar senha", http.StatusInternalServerError)
+			return
+		}
+		existingUser.Password = string(hashedPassword)
+	}
+	if user.RoleID != 0 && user.RoleID != existingUser.RoleID {
+		existingUser.RoleID = user.RoleID
+	}
+
+	// Atualiza os campos no banco de dados
+	existingUser.UpdatedAt = time.Now()
+	result = database.DB.Save(&existingUser)
 	if result.Error != nil {
 		http.Error(w, "Erro ao atualizar usuário", http.StatusInternalServerError)
 		return
 	}
 
+	// Retorna o usuário atualizado
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(user)
+	json.NewEncoder(w).Encode(existingUser)
 }
 
 // DeleteUser remove um usuário pelo ID
 // @Summary Remove um usuário pelo ID
 // @Description Exclui um usuário com base no ID fornecido
+// @Security BearerAuth
 // @Param id path int true "ID do usuário"
 // @Success 200 {object} map[string]string "Usuário excluído com sucesso"
 // @Failure 400 {string} string "ID inválido"
 // @Failure 500 {string} string "Erro ao excluir usuário"
-// @Router /users/{id} [delete]
+// @Router /admin/users/{id} [delete]
 func DeleteUser(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	id, err := strconv.Atoi(params["id"])
@@ -255,6 +285,7 @@ func DeleteUser(w http.ResponseWriter, r *http.Request) {
 // GetTasks retorna uma lista de tarefas fictícias
 // @Summary Retorna uma lista de tarefas
 // @Description Obtém uma lista de tarefas fictícias para a demonstração
+// @Security BearerAuth
 // @Produce  json
 // @Success 200 {array} map[string]string "Lista de tarefas"
 // @Router /protected/tasks [get]

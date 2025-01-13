@@ -1,9 +1,124 @@
 {
     "swagger": "2.0",
     "info": {
-        "contact": {}
+        "description": "Gotham é um projeto de uma API desenvolvido para gerenciar usuários, permissões e autenticação de forma robusta e segura.",
+        "title": "Gotham API",
+        "contact": {
+            "name": "Jefferson Martins",
+            "url": "https://www.linkedin.com/in/jefferson-martins-a6802b249/",
+            "email": "jefferson.developers@gmail.com"
+        },
+        "license": {
+            "name": "MIT",
+            "url": "https://opensource.org/licenses/MIT"
+        },
+        "version": "1.1.5"
     },
+    "host": "localhost:8000",
+    "basePath": "/",
     "paths": {
+        "/admin/users/{id}": {
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Atualiza os dados de um usuário com base no ID fornecido",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Atualiza as informações de um usuário",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID do usuário",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Dados do usuário a serem atualizados",
+                        "name": "user",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.User"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Usuário atualizado com sucesso",
+                        "schema": {
+                            "$ref": "#/definitions/models.User"
+                        }
+                    },
+                    "400": {
+                        "description": "ID ou dados inválidos",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Usuário não encontrado",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Erro ao atualizar usuário",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Exclui um usuário com base no ID fornecido",
+                "summary": "Remove um usuário pelo ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID do usuário",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Usuário excluído com sucesso",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "ID inválido",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Erro ao excluir usuário",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/login": {
             "post": {
                 "description": "Autentica o usuário e gera um token JWT",
@@ -52,6 +167,11 @@
         },
         "/protected/tasks": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Obtém uma lista de tarefas fictícias para a demonstração",
                 "produces": [
                     "application/json"
@@ -228,96 +348,6 @@
                         }
                     }
                 }
-            },
-            "put": {
-                "description": "Atualiza os dados de um usuário com base no ID fornecido",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "summary": "Atualiza as informações de um usuário",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "ID do usuário",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "Dados do usuário a serem atualizados",
-                        "name": "user",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/models.User"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Usuário atualizado com sucesso",
-                        "schema": {
-                            "$ref": "#/definitions/models.User"
-                        }
-                    },
-                    "400": {
-                        "description": "ID ou dados inválidos",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "404": {
-                        "description": "Usuário não encontrado",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "500": {
-                        "description": "Erro ao atualizar usuário",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            },
-            "delete": {
-                "description": "Exclui um usuário com base no ID fornecido",
-                "summary": "Remove um usuário pelo ID",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "ID do usuário",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Usuário excluído com sucesso",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "ID inválido",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "500": {
-                        "description": "Erro ao excluir usuário",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
             }
         }
     },
@@ -397,6 +427,13 @@
                     "type": "string"
                 }
             }
+        }
+    },
+    "securityDefinitions": {
+        "BearerAuth": {
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
         }
     }
 }

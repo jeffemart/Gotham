@@ -13,6 +13,23 @@ import (
 )
 
 func main() {
+	// @title Gotham API
+	// @version 1.1.5
+	// @description Gotham é um projeto de uma API desenvolvido para gerenciar usuários, permissões e autenticação de forma robusta e segura.
+
+	// @contact.name Jefferson Martins
+	// @contact.url https://www.linkedin.com/in/jefferson-martins-a6802b249/
+	// @contact.email jefferson.developers@gmail.com
+
+	// @license.name MIT
+	// @license.url https://opensource.org/licenses/MIT
+
+	// @host localhost:8000
+	// @BasePath /
+
+	// @securityDefinitions.apikey BearerAuth
+	// @in header
+	// @name Authorization
 	// Conectar ao banco de dados
 	database.Connect()
 

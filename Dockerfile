@@ -22,6 +22,7 @@ COPY --from=build /app/main .
 
 # Expor a porta 8000
 EXPOSE 8000
+EXPOSE 8080
 
 # Rodar a aplicação Go
 CMD ["./main"]

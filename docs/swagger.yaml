@@ -1,3 +1,4 @@
+basePath: /
 definitions:
   models.LoginRequest:
     properties:
@@ -48,9 +49,85 @@ definitions:
       updatedAt:
         type: string
     type: object
+host: localhost:8000
 info:
-  contact: {}
+  contact:
+    email: jefferson.developers@gmail.com
+    name: Jefferson Martins
+    url: https://www.linkedin.com/in/jefferson-martins-a6802b249/
+  description: Gotham é um projeto de uma API desenvolvido para gerenciar usuários,
+    permissões e autenticação de forma robusta e segura.
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+  title: Gotham API
+  version: 1.1.5
 paths:
+  /admin/users/{id}:
+    delete:
+      description: Exclui um usuário com base no ID fornecido
+      parameters:
+      - description: ID do usuário
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: Usuário excluído com sucesso
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: ID inválido
+          schema:
+            type: string
+        "500":
+          description: Erro ao excluir usuário
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Remove um usuário pelo ID
+    put:
+      consumes:
+      - application/json
+      description: Atualiza os dados de um usuário com base no ID fornecido
+      parameters:
+      - description: ID do usuário
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Dados do usuário a serem atualizados
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/models.User'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Usuário atualizado com sucesso
+          schema:
+            $ref: '#/definitions/models.User'
+        "400":
+          description: ID ou dados inválidos
+          schema:
+            type: string
+        "404":
+          description: Usuário não encontrado
+          schema:
+            type: string
+        "500":
+          description: Erro ao atualizar usuário
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Atualiza as informações de um usuário
   /login:
     post:
       consumes:
@@ -95,6 +172,8 @@ paths:
                 type: string
               type: object
             type: array
+      security:
+      - BearerAuth: []
       summary: Retorna uma lista de tarefas
   /refresh_token:
     post:
@@ -175,30 +254,6 @@ paths:
             type: string
       summary: Cria um novo usuário
   /users/{id}:
-    delete:
-      description: Exclui um usuário com base no ID fornecido
-      parameters:
-      - description: ID do usuário
-        in: path
-        name: id
-        required: true
-        type: integer
-      responses:
-        "200":
-          description: Usuário excluído com sucesso
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "400":
-          description: ID inválido
-          schema:
-            type: string
-        "500":
-          description: Erro ao excluir usuário
-          schema:
-            type: string
-      summary: Remove um usuário pelo ID
     get:
       description: Obtém um usuário específico com base no ID fornecido
       parameters:
@@ -223,40 +278,9 @@ paths:
           schema:
             type: string
       summary: Retorna um usuário pelo ID
-    put:
-      consumes:
-      - application/json
-      description: Atualiza os dados de um usuário com base no ID fornecido
-      parameters:
-      - description: ID do usuário
-        in: path
-        name: id
-        required: true
-        type: integer
-      - description: Dados do usuário a serem atualizados
-        in: body
-        name: user
-        required: true
-        schema:
-          $ref: '#/definitions/models.User'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Usuário atualizado com sucesso
-          schema:
-            $ref: '#/definitions/models.User'
-        "400":
-          description: ID ou dados inválidos
-          schema:
-            type: string
-        "404":
-          description: Usuário não encontrado
-          schema:
-            type: string
-        "500":
-          description: Erro ao atualizar usuário
-          schema:
-            type: string
-      summary: Atualiza as informações de um usuário
+securityDefinitions:
+  BearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: "2.0"
