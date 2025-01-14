@@ -1,137 +1,147 @@
-# Gotham
+# Gotham API
 
-Gotham é uma aplicação construída em Go, utilizando PostgreSQL como banco de dados e Redis como cache. Este projeto segue uma arquitetura modular e utiliza Docker para gerenciar os serviços e facilitar a implantação.
+Gotham é uma API robusta desenvolvida em Go para gerenciamento de usuários, permissões e autenticação. O projeto utiliza PostgreSQL como banco de dados principal e Redis para cache de tokens, seguindo boas práticas de desenvolvimento e arquitetura modular.
 
-## Estrutura do Projeto
+## 🚀 Funcionalidades
+
+- Autenticação JWT com refresh token
+- Controle de acesso baseado em roles (RBAC)
+- Cache de tokens com Redis
+- Documentação automática com Swagger
+- Containerização com Docker
+- CI/CD com GitHub Actions
+
+## 🛠️ Tecnologias
+
+- **Go** 1.23+
+- **PostgreSQL** 13
+- **Redis** 6
+- **Docker** e Docker Compose
+- **JWT** para autenticação
+- **GORM** como ORM
+- **Swagger** para documentação
+- **GitHub Actions** para CI/CD
+
+## 📦 Estrutura do Projeto
 
 ```
 Gotham/
-├── app/
-│   ├── database/
-│   ├── handlers/
-│   ├── middlewares/
-│   ├── migrations/
-│   ├── models/
-│   ├── routes/
-│   ├── settings/
-│   ├── utils/
-│   └── main.go
-├── docker-compose.yml
-├── .env
-└── README.md
+├── database/       # Configuração e conexão com bancos de dados
+├── docs/          # Documentação Swagger
+├── handlers/      # Handlers HTTP
+├── middlewares/   # Middlewares de autenticação e autorização
+├── migrations/    # Migrações do banco de dados
+├── models/        # Modelos de dados
+├── routes/        # Configuração de rotas
+├── settings/      # Configurações da aplicação
+├── utils/         # Funções utilitárias
+└── main.go        # Ponto de entrada da aplicação
 ```
 
-- **handlers/**: Contém as funções para lidar com as rotas da API.
-- **middlewares/**: Middleware para validação de autenticação e autorização.
-- **models/**: Definições de modelos e interações com o banco de dados.
-- **routes/**: Configuração de rotas e agrupamentos.
-- **utils/**: Funções utilitárias, como parsing de JWT.
-- **main.go**: Ponto de entrada da aplicação.
-
-## Pré-requisitos
-
-Certifique-se de ter os seguintes itens instalados:
-
-- [Docker](https://www.docker.com/)
-- [Docker Compose](https://docs.docker.com/compose/)
-- Go 1.20+
-
-## Configuração
-
-### Variáveis de Ambiente
-
-Crie um arquivo `.env` na raiz do projeto com o seguinte conteúdo:
-
-```
-# Variáveis para a aplicação Go
-APP_NAME=Gotham
-APP_ENV=local
-APP_KEY=
-APP_PORT=8000
-APP_DEBUG=true
-APP_URL=http://localhost
-
-# Variáveis para o Postgres
-POSTGRES_USER=user
-POSTGRES_PASSWORD=password
-POSTGRES_DB=gotham_db
-POSTGRES_PORT=5432
-
-# Variáveis para o Redis
-REDIS_HOST=redis
-REDIS_PORT=6379
-```
-
-### Subindo os Serviços
-
-1. Clone o repositório:
-
-   ```bash
-   git clone https://github.com/jeffemart/Gotham.git
-   cd Gotham
-   ```
-
-2. Suba os serviços utilizando Docker Compose:
-
-   ```bash
-   docker-compose --env-file .env up --build
-   ```
-
-3. Acesse a aplicação em `http://localhost:8000`.
-
-## Endpoints da API
+## 🚦 Endpoints da API
 
 ### Rotas Públicas
-
-- `GET /users`: Retorna a lista de usuários.
-- `GET /users/{id}`: Retorna um usuário específico pelo ID.
+- `POST /login` - Autenticação de usuário
+- `GET /users` - Lista todos os usuários
+- `GET /users/{id}` - Obtém um usuário específico
+- `POST /users` - Cria um novo usuário
 
 ### Rotas Protegidas (Admin)
-
-- `POST /admin/users`: Cria um novo usuário.
-- `PUT /admin/users/{id}`: Atualiza um usuário existente.
-- `DELETE /admin/users/{id}`: Exclui um usuário.
+- `PUT /admin/users/{id}` - Atualiza um usuário
+- `DELETE /admin/users/{id}` - Remove um usuário
 
 ### Rotas Protegidas (Admin ou Agente)
+- `GET /protected/tasks` - Lista tarefas
 
-- `GET /protected/tasks`: Retorna a lista de tarefas.
+## 🛠️ Instalação
 
-### Autenticação
+### Pré-requisitos
+- Docker e Docker Compose
+- Go 1.23+
+- Make (opcional)
 
-- `POST /login`: Gera um token JWT para autenticação.
-- `POST /refresh`: Gera um novo token JWT a partir de um token válido.
+### Configuração
 
-## Testando a API
-
-Utilize ferramentas como [Postman](https://www.postman.com/) ou [cURL](https://curl.se/) para testar os endpoints.
-
-### Exemplo de Requisição
-
-#### Login
-
+1. Clone o repositório:
 ```bash
-curl -X POST http://localhost:8000/login \
-  -H "Content-Type: application/json" \
-  -d '{"email": "admin@example.com", "password": "admin123"}'
+git clone https://github.com/jeffemart/Gotham.git
+cd Gotham
 ```
 
-#### Criar Usuário (Admin)
-
+2. Copie o arquivo de exemplo de ambiente:
 ```bash
-curl -X POST http://localhost:8000/admin/users \
-  -H "Authorization: Bearer <TOKEN>" \
-  -H "Content-Type: application/json" \
-  -d '{"name": "John Doe", "email": "johndoe@example.com"}'
+cp .env-example .env
 ```
 
-## Tecnologias Utilizadas
+3. Configure as variáveis de ambiente no arquivo `.env`
 
-- **Linguagem**: Go
-- **Banco de Dados**: PostgreSQL
-- **Cache**: Redis
-- **Containerização**: Docker
+4. Inicie os containers:
+```bash
+docker-compose up -d
+```
 
-## Licença
+## 🚀 Deployment
 
-Este projeto está sob a licença [MIT](https://opensource.org/licenses/MIT).
+A aplicação pode ser implantada de duas formas:
+
+### Usando Docker Compose
+```bash
+docker-compose up -d
+```
+
+### Usando a Imagem Docker
+```bash
+docker pull jeffemart/gotham:latest
+docker run -p 8000:8000 jeffemart/gotham:latest
+```
+
+## 📦 CI/CD
+
+O projeto utiliza GitHub Actions para:
+- Build automático
+- Testes
+- Publicação da imagem Docker
+
+Para usar o pipeline de CI/CD, configure os seguintes secrets no GitHub:
+- `DOCKERHUB_USERNAME`: Seu usuário do Docker Hub
+- `DOCKERHUB_TOKEN`: Token de acesso do Docker Hub
+
+## 📝 Documentação
+
+A documentação da API está disponível através do Swagger UI em:
+```
+http://localhost:8000/swagger/index.html
+```
+
+## 🔐 Segurança
+
+- Autenticação via JWT
+- Refresh tokens
+- Senhas criptografadas com bcrypt
+- CORS configurado
+- Rate limiting
+- Proteção contra ataques comuns
+
+## 🤝 Contribuindo
+
+1. Fork o projeto
+2. Crie sua branch de feature (`git checkout -b feature/AmazingFeature`)
+3. Commit suas mudanças (`git commit -m 'Add some AmazingFeature'`)
+4. Push para a branch (`git push origin feature/AmazingFeature`)
+5. Abra um Pull Request
+
+## 📄 Licença
+
+Este projeto está sob a licença MIT - veja o arquivo [LICENSE](LICENSE) para detalhes.
+
+## 👤 Autor
+
+Jefferson Martins
+- LinkedIn: [jefferson-martins](https://www.linkedin.com/in/jefferson-martins-a6802b249/)
+- Email: jefferson.developers@gmail.com
+
+## 🙏 Agradecimentos
+
+- Todos os contribuidores que ajudaram a tornar este projeto melhor
+- A comunidade Go por ferramentas e bibliotecas incríveis
 
