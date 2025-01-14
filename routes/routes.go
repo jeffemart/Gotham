@@ -2,11 +2,11 @@ package routes
 
 import (
 	"github.com/gorilla/mux"
+	_ "github.com/jeffemart/Gotham/docs"
 	"github.com/jeffemart/Gotham/handlers"
 	"github.com/jeffemart/Gotham/middlewares"
 	"github.com/rs/cors"
 	httpSwagger "github.com/swaggo/http-swagger"
-	_ "github.com/jeffemart/Gotham/docs"
 )
 
 func SetupRoutes() *mux.Router {
@@ -26,7 +26,7 @@ func SetupRoutes() *mux.Router {
 		},
 		AllowCredentials: true,
 	})
-	
+
 	router := mux.NewRouter()
 
 	// Aplicar o middleware CORS
@@ -45,13 +45,15 @@ func SetupRoutes() *mux.Router {
 
 	// Rotas protegidas (somente para administradores)
 	adminRoutes := router.PathPrefix("/admin").Subrouter()
-	adminRoutes.Use(middlewares.RoleMiddleware("admin")) // Apenas administradores podem acessar
+	adminRoutes.Use(middlewares.AuthMiddleware)          // Primeiro verifica autenticação
+	adminRoutes.Use(middlewares.RoleMiddleware("admin")) // Depois verifica a role
 	adminRoutes.HandleFunc("/users/{id:[0-9]+}", handlers.UpdateUser).Methods("PUT")
 	adminRoutes.HandleFunc("/users/{id:[0-9]+}", handlers.DeleteUser).Methods("DELETE")
 
 	// Rotas para qualquer usuário autenticado (exemplo de admin ou agente)
 	protectedRoutes := router.PathPrefix("/protected").Subrouter()
-	protectedRoutes.Use(middlewares.RoleMiddleware("admin", "agente")) // Admin ou agente podem acessar
+	protectedRoutes.Use(middlewares.AuthMiddleware)                    // Primeiro verifica autenticação
+	protectedRoutes.Use(middlewares.RoleMiddleware("admin", "agente")) // Depois verifica a role
 	protectedRoutes.HandleFunc("/tasks", handlers.GetTasks).Methods("GET")
 
 	return router
