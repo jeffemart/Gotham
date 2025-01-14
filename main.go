@@ -14,7 +14,7 @@ import (
 
 func main() {
 	// @title Gotham API
-	// @version 1.1.10
+	// @version 1.1.11
 	// @description Gotham é um projeto de uma API desenvolvido para gerenciar usuários, permissões e autenticação de forma robusta e segura.
 
 	// @contact.name Jefferson Martins
