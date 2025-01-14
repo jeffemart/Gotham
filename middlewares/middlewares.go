@@ -11,24 +11,43 @@ import (
 	"github.com/jeffemart/Gotham/utils"
 )
 
-// RoleMiddleware verifica se o usuário tem uma das permissões ou roles necessárias para acessar a rota
+// AuthMiddleware verifica se o token JWT é válido
+func AuthMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Verificar token JWT no cabeçalho Authorization
+		authHeader := r.Header.Get("Authorization")
+		if authHeader == "" {
+			http.Error(w, "Token não fornecido", http.StatusUnauthorized)
+			return
+		}
+
+		// Extrair o token do cabeçalho
+		tokenString := strings.TrimPrefix(authHeader, "Bearer ")
+
+		// Parse e validação do token
+		token, claims, err := utils.ParseToken(tokenString)
+		if err != nil || token == nil || !token.Valid {
+			http.Error(w, "Token inválido ou expirado", http.StatusUnauthorized)
+			return
+		}
+
+		// Adicionar o Claims ao contexto para que as próximas funções possam acessar
+		ctx := context.WithValue(r.Context(), utils.RoleKey, claims)
+		r = r.WithContext(ctx)
+
+		// Chamar o próximo handler na cadeia
+		next.ServeHTTP(w, r)
+	})
+}
+
+// RoleMiddleware verifica se o usuário tem uma das roles necessárias para acessar a rota
 func RoleMiddleware(roles ...string) mux.MiddlewareFunc {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			// Verificar token JWT no cabeçalho Authorization
-			authHeader := r.Header.Get("Authorization")
-			if authHeader == "" {
-				http.Error(w, "Token não fornecido", http.StatusUnauthorized)
-				return
-			}
-
-			// Extrair o token do cabeçalho
-			tokenString := strings.TrimPrefix(authHeader, "Bearer ")
-
-			// Parse do token
-			token, claims, err := utils.ParseToken(tokenString)
-			if err != nil || token == nil || !token.Valid {
-				http.Error(w, "Token inválido ou expirado", http.StatusUnauthorized)
+			// Obter claims do contexto (setado pelo AuthMiddleware)
+			claims, ok := r.Context().Value(utils.RoleKey).(*utils.Claims)
+			if !ok {
+				http.Error(w, "Erro ao obter informações do usuário", http.StatusInternalServerError)
 				return
 			}
 
@@ -67,6 +86,9 @@ func RoleMiddleware(roles ...string) mux.MiddlewareFunc {
 				if claims.RoleID == 1 || claims.RoleID == 2 {
 					permissionGranted = true
 				}
+			default:
+				// Para outros métodos, concede permissão
+				permissionGranted = true
 			}
 
 			// Se a permissão não for concedida, retorna erro
@@ -74,10 +96,6 @@ func RoleMiddleware(roles ...string) mux.MiddlewareFunc {
 				http.Error(w, "Acesso negado: você não tem permissão para acessar essa rota", http.StatusForbidden)
 				return
 			}
-
-			// Adicionar o Claims ao contexto para que as próximas funções possam acessar
-			ctx := context.WithValue(r.Context(), utils.RoleKey, claims)
-			r = r.WithContext(ctx)
 
 			// Chamar o próximo handler na cadeia
 			next.ServeHTTP(w, r)
