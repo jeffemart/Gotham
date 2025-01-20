@@ -1,5 +1,9 @@
 # Gotham API
 
+![Gotham Logo](https://res.cloudinary.com/dx70wyorg/image/upload/v1737405446/goupher_inspirado_no_batman_onrehb.png)
+
+https://res.cloudinary.com/dx70wyorg/image/upload/v1737405446/goupher_inspirado_no_batman_onrehb.png
+
 Gotham é uma API robusta desenvolvida em Go para gerenciamento de usuários, permissões e autenticação. O projeto utiliza PostgreSQL como banco de dados principal e Redis para cache de tokens, seguindo boas práticas de desenvolvimento e arquitetura modular.
 
 ## 🚀 Funcionalidades
