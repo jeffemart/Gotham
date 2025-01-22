@@ -3,8 +3,8 @@ package migrations
 import (
 	"log"
 
-	"github.com/jeffemart/Gotham/database"
-	"github.com/jeffemart/Gotham/models"
+	"github.com/jeffemart/Gotham/internal/database"
+	"github.com/jeffemart/Gotham/internal/models"
 )
 
 // Run executa a migração do banco de dados

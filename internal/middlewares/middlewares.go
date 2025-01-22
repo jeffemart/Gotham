@@ -6,9 +6,9 @@ import (
 	"strings"
 
 	"github.com/gorilla/mux"
-	"github.com/jeffemart/Gotham/database"
-	"github.com/jeffemart/Gotham/models"
-	"github.com/jeffemart/Gotham/utils"
+	"github.com/jeffemart/Gotham/internal/database"
+	"github.com/jeffemart/Gotham/internal/models"
+	"github.com/jeffemart/Gotham/internal/utils"
 )
 
 // AuthMiddleware verifica se o token JWT é válido

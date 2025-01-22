@@ -9,15 +9,15 @@ import (
 // Config estrutura que contém as configurações do projeto
 type Config struct {
 	App struct {
-		Name  string // Nome do aplicativo
-		Env   string // Ambiente do aplicativo (local, staging, production)
-		Key   string // Chave de criptografia
-		Port  string // Porta do servidor
-		Debug bool   // Ativar ou desativar o modo de depuração
-		URL   string // URL base do aplicativo
+		Name  string
+		Env   string
+		Key   string
+		Port  string
+		Debug bool
+		URL   string
 	}
 	Database struct {
-		Driver   string // Driver do banco de dados (e.g., postgres, mysql, mongo)
+		Driver   string
 		Host     string
 		Port     string
 		User     string
@@ -46,7 +46,7 @@ func LoadSettings() *Config {
 
 	// Configurações do banco de dados
 	config.Database.Driver = getEnv("DB_DRIVER", "postgres")
-	config.Database.Host = getEnv("DB_HOST", "172.28.0.3") // IP do Postgres
+	config.Database.Host = getEnv("DB_HOST", "172.28.0.3")
 	config.Database.Port = getEnv("POSTGRES_PORT", "5432")
 	config.Database.User = getEnv("POSTGRES_USER", "user")
 	config.Database.Password = getEnv("POSTGRES_PASSWORD", "password")

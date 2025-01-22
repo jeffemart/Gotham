@@ -3,14 +3,32 @@ package main
 import (
 	"log"
 	"net/http"
+	"os"
 
-	"golang.org/x/crypto/bcrypt"
-
-	"github.com/jeffemart/Gotham/database"
+	"github.com/jeffemart/Gotham/internal/database"
+	"github.com/jeffemart/Gotham/internal/models"
+	"github.com/jeffemart/Gotham/internal/routes"
+	"github.com/jeffemart/Gotham/internal/settings"
 	"github.com/jeffemart/Gotham/migrations"
-	"github.com/jeffemart/Gotham/models"
-	"github.com/jeffemart/Gotham/routes"
+	"golang.org/x/crypto/bcrypt"
 )
+
+func serveSwaggerFile(w http.ResponseWriter, r *http.Request) {
+	// Lê o arquivo JSON do Swagger
+	jsonFile, err := os.ReadFile("docs/openapi.json")
+	if err != nil {
+		log.Printf("Erro ao ler arquivo Swagger: %v", err)
+		http.Error(w, "Não foi possível ler o arquivo Swagger", http.StatusInternalServerError)
+		return
+	}
+
+	// Define o tipo de conteúdo como JSON
+	w.Header().Set("Content-Type", "application/json")
+	// Permite CORS
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	// Escreve o conteúdo do arquivo
+	w.Write(jsonFile)
+}
 
 func main() {
 	// @title Gotham API
@@ -30,6 +48,10 @@ func main() {
 	// @securityDefinitions.apikey BearerAuth
 	// @in header
 	// @name Authorization
+
+	// Carregar configurações
+	config := settings.LoadSettings()
+
 	// Conectar ao banco de dados
 	database.Connect()
 
@@ -79,6 +101,16 @@ func main() {
 	// Configurar rotas
 	router := routes.SetupRoutes()
 
-	log.Println("Servidor iniciado na porta 8000...")
-	log.Fatal(http.ListenAndServe(":8000", router))
+	// Adicionar rota para servir o arquivo Swagger JSON
+	router.HandleFunc("/swagger/openapi.json", serveSwaggerFile).Methods("GET")
+
+	// Servir o Swagger UI
+	fs := http.FileServer(http.Dir("api/swagger"))
+	router.PathPrefix("/swagger/").Handler(http.StripPrefix("/swagger/", fs))
+
+	// Iniciar servidor na porta configurada
+	port := config.App.Port
+	log.Printf("Servidor iniciado na porta %s...", port)
+	log.Printf("Documentação Swagger disponível em http://localhost:%s/swagger/", port)
+	log.Fatal(http.ListenAndServe(":"+port, router))
 }

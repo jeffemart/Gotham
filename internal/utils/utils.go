@@ -7,8 +7,8 @@ import (
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/go-redis/redis/v8"
-	"github.com/jeffemart/Gotham/database"
-	"github.com/jeffemart/Gotham/models"
+	"github.com/jeffemart/Gotham/internal/database"
+	"github.com/jeffemart/Gotham/internal/models"
 )
 
 // Define a chave secreta (deve ser configurada como variável de ambiente)

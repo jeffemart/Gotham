@@ -2,11 +2,9 @@ package routes
 
 import (
 	"github.com/gorilla/mux"
-	_ "github.com/jeffemart/Gotham/docs"
-	"github.com/jeffemart/Gotham/handlers"
-	"github.com/jeffemart/Gotham/middlewares"
+	"github.com/jeffemart/Gotham/internal/handlers"
+	"github.com/jeffemart/Gotham/internal/middlewares"
 	"github.com/rs/cors"
-	httpSwagger "github.com/swaggo/http-swagger"
 )
 
 func SetupRoutes() *mux.Router {
@@ -39,9 +37,6 @@ func SetupRoutes() *mux.Router {
 
 	// Rota de login (pública)
 	router.HandleFunc("/login", handlers.Login).Methods("POST")
-
-	// Adicionando a rota Swagger para documentação
-	router.Handle("/swagger/{any:.*}", httpSwagger.WrapHandler)
 
 	// Rotas protegidas (somente para administradores)
 	adminRoutes := router.PathPrefix("/admin").Subrouter()

@@ -1,20 +1,27 @@
-# Ignorar arquivos temporários do sistema
+# Arquivos de sistema
+.DS_Store
 *.swp
 *.tmp
 *.log
 
-# Ignorar arquivos e pastas específicas
-node_modules
-build/
-dist/
+# Arquivos de desenvolvimento
+.git/
+.gitignore
+.env
+.env*
+*.md
+/vendor/
+/bin/
+/tmp/
+*.test
+*.out
+
+# IDEs e editores
 .vscode/
 .idea/
-*.env
+*.sublime-*
 
-# Ignorar arquivos relacionados ao Git
-.git
-.gitignore
-
-# Ignorar arquivos Docker
+# Docker
 .dockerignore
 Dockerfile*
+docker-compose*
