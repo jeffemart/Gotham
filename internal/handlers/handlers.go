@@ -170,14 +170,16 @@ func GetUser(w http.ResponseWriter, r *http.Request) {
 }
 
 // GetUsers retorna todos os usuários cadastrados com paginação
-// @Summary Retorna todos os usuários com paginação
-// @Description Obtém uma lista de todos os usuários cadastrados no sistema com base na paginação
-// @Produce  json
-// @Param page query int false "Número da página" default(1)
-// @Param limit query int false "Limite de usuários por página" default(10)
-// @Success 200 {object} utils.PaginatedResponse "Lista de usuários com paginação"
-// @Failure 500 {string} string "Erro ao buscar usuários"
-// @Router /users [get]
+// @Summary      Lista todos os usuários
+// @Description  Retorna uma lista paginada de todos os usuários
+// @Tags         users
+// @Accept       json
+// @Produce      json
+// @Param        page query int false "Número da página" default(1)
+// @Param        limit query int false "Itens por página" default(10)
+// @Success      200  {object}  models.PaginatedResponse
+// @Failure      500  {object}  ErrorResponse
+// @Router       /users [get]
 func GetUsers(w http.ResponseWriter, r *http.Request) {
 	// Pega os parâmetros de query (página e limite)
 	pageStr := r.URL.Query().Get("page")

@@ -39,6 +39,7 @@ type RefreshRequest struct {
 	RefreshToken string `json:"refresh_token"`
 }
 
+// PaginatedResponse representa uma resposta paginada
 type PaginatedResponse struct {
 	Status      int         `json:"status"`
 	Message     string      `json:"message"`
@@ -47,4 +48,10 @@ type PaginatedResponse struct {
 	TotalPages  int         `json:"total_pages"`
 	CurrentPage int         `json:"current_page"`
 	Limit       int         `json:"limit"`
+}
+
+// ErrorResponse representa uma resposta de erro
+type ErrorResponse struct {
+	Status  int    `json:"status"`
+	Message string `json:"message"`
 }

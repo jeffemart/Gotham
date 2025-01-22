@@ -9,9 +9,11 @@ Gotham é uma API robusta desenvolvida em Go para gerenciamento de usuários, pe
 - Autenticação JWT com refresh token
 - Controle de acesso baseado em roles (RBAC)
 - Cache de tokens com Redis
-- Documentação automática com Swagger
 - Containerização com Docker
 - CI/CD com GitHub Actions
+- Migrations automáticas
+- Seeds para dados iniciais
+- Testes unitários e de integração
 
 ## 🛠️ Tecnologias
 
@@ -21,48 +23,62 @@ Gotham é uma API robusta desenvolvida em Go para gerenciamento de usuários, pe
 - **Docker** e Docker Compose
 - **JWT** para autenticação
 - **GORM** como ORM
-- **Swagger** para documentação
+- **Gorilla Mux** para roteamento
 - **GitHub Actions** para CI/CD
+- **Testify** para testes
 
 ## 📦 Estrutura do Projeto
 
 ```
 Gotham/
-├── database/       # Configuração e conexão com bancos de dados
-├── docs/          # Documentação Swagger
-├── handlers/      # Handlers HTTP
-├── middlewares/   # Middlewares de autenticação e autorização
-├── migrations/    # Migrações do banco de dados
-├── models/        # Modelos de dados
-├── routes/        # Configuração de rotas
-├── settings/      # Configurações da aplicação
-├── utils/         # Funções utilitárias
-└── main.go        # Ponto de entrada da aplicação
+├── cmd/
+│   └── gotham/
+│       └── main.go
+├── internal/
+│   ├── database/
+│   │   └── database.go
+│   ├── handlers/
+│   │   └── handlers.go
+│   ├── middlewares/
+│   │   └── middlewares.go
+│   ├── models/
+│   │   └── models.go
+│   ├── routes/
+│   │   └── routes.go
+│   ├── seeds/
+│   │   └── seeds.go
+│   ├── settings/
+│   │   └── config.go
+│   └── utils/
+│       └── utils.go
+├── migrations/
+│   └── migrations.go
+├── pkg/
+│   └── validator/
+│       └── validator.go
+├── test/
+│   ├── config/
+│   │   └── config.go
+│   ├── helpers/
+│   │   └── test_helper.go
+│   ├── integration/
+│   │   └── user_test.go
+│   └── unit/
+│       └── utils_test.go
+├── .dockerignore
+├── .env
+├── .env-example
+├── .gitignore
+├── docker-compose.yml
+├── Dockerfile
+├── go.mod
+├── go.sum
+├── LICENSE
+├── Makefile
+└── README.md
 ```
 
-## 🚦 Endpoints da API
-
-### Rotas Públicas
-- `POST /login` - Autenticação de usuário
-- `GET /users` - Lista todos os usuários
-- `GET /users/{id}` - Obtém um usuário específico
-- `POST /users` - Cria um novo usuário
-
-### Rotas Protegidas (Admin)
-- `PUT /admin/users/{id}` - Atualiza um usuário
-- `DELETE /admin/users/{id}` - Remove um usuário
-
-### Rotas Protegidas (Admin ou Agente)
-- `GET /protected/tasks` - Lista tarefas
-
-## 🛠️ Instalação
-
-### Pré-requisitos
-- Docker e Docker Compose
-- Go 1.23+
-- Make (opcional)
-
-### Configuração
+## 🚀 Como Executar
 
 1. Clone o repositório:
 ```bash
@@ -70,80 +86,41 @@ git clone https://github.com/jeffemart/Gotham.git
 cd Gotham
 ```
 
-2. Copie o arquivo de exemplo de ambiente:
+2. Configure as variáveis de ambiente:
 ```bash
 cp .env-example .env
+# Edite o arquivo .env com suas configurações
 ```
 
-3. Configure as variáveis de ambiente no arquivo `.env`
-
-4. Inicie os containers:
+3. Execute com Docker:
 ```bash
 docker-compose up -d
 ```
 
-## 🚀 Deployment
-
-A aplicação pode ser implantada de duas formas:
-
-### Usando Docker Compose
+4. Ou execute localmente:
 ```bash
-docker-compose up -d
+go run cmd/gotham/main.go
 ```
 
-### Usando a Imagem Docker
+## ⚡ Testes
+
+Para executar os testes:
 ```bash
-docker pull jeffemart/gotham:latest
-docker run -p 8000:8000 jeffemart/gotham:latest
+make test
 ```
 
-## 📦 CI/CD
-
-O projeto utiliza GitHub Actions para:
-- Build automático
-- Testes
-- Publicação da imagem Docker
-
-Para usar o pipeline de CI/CD, configure os seguintes secrets no GitHub:
-- `DOCKERHUB_USERNAME`: Seu usuário do Docker Hub
-- `DOCKERHUB_TOKEN`: Token de acesso do Docker Hub
-
-## 📝 Documentação
-
-A documentação da API está disponível através do Swagger UI em:
-```
-http://localhost:8000/swagger/index.html
-```
-
-## 🔐 Segurança
-
-- Autenticação via JWT
-- Refresh tokens
-- Senhas criptografadas com bcrypt
-- CORS configurado
-- Rate limiting
-- Proteção contra ataques comuns
-
-## 🤝 Contribuindo
+## 🤝 Contribuição
 
 1. Fork o projeto
-2. Crie sua branch de feature (`git checkout -b feature/AmazingFeature`)
+2. Crie sua Feature Branch (`git checkout -b feature/AmazingFeature`)
 3. Commit suas mudanças (`git commit -m 'Add some AmazingFeature'`)
-4. Push para a branch (`git push origin feature/AmazingFeature`)
+4. Push para a Branch (`git push origin feature/AmazingFeature`)
 5. Abra um Pull Request
 
-## 📄 Licença
+## 📝 Licença
 
-Este projeto está sob a licença MIT - veja o arquivo [LICENSE](LICENSE) para detalhes.
+Este projeto está licenciado sob a MIT License - veja o arquivo [LICENSE](LICENSE) para detalhes.
 
-## 👤 Autor
+## 👨‍💻 Autor
 
-Jefferson Martins
-- LinkedIn: [jefferson-martins](https://www.linkedin.com/in/jefferson-martins-a6802b249/)
-- Email: jefferson.developers@gmail.com
-
-## 🙏 Agradecimentos
-
-- Todos os contribuidores que ajudaram a tornar este projeto melhor
-- A comunidade Go por ferramentas e bibliotecas incríveis
-
+Jefferson Martins - [LinkedIn](https://www.linkedin.com/in/jefferson-martins-a6802b249/)
