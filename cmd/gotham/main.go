@@ -9,6 +9,7 @@ import (
 	"github.com/jeffemart/Gotham/internal/routes"
 	"github.com/jeffemart/Gotham/internal/settings"
 	"github.com/jeffemart/Gotham/migrations"
+	_ "github.com/jeffemart/Gotham/docs"
 )
 
 //go:generate swag init -g cmd/gotham/main.go -o docs
@@ -56,6 +57,9 @@ func main() {
 
 	// Setup das rotas
 	routes.SetupRoutes(r)
+
+	// Rota para servir a documentação Swagger
+	r.PathPrefix("/swagger/").Handler(http.StripPrefix("/swagger/", http.FileServer(http.Dir("./docs/swagger"))))
 
 	// Iniciar servidor na porta configurada
 	port := config.App.Port
