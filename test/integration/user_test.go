@@ -1,3 +1,5 @@
+// test/integration/user_test.go
+
 package integration
 
 import (
@@ -12,6 +14,7 @@ import (
 	"github.com/jeffemart/Gotham/internal/routes"
 	"github.com/jeffemart/Gotham/test/helpers"
 	"github.com/stretchr/testify/assert"
+	"github.com/gorilla/mux"
 )
 
 func TestUserCreation(t *testing.T) {
@@ -19,8 +22,11 @@ func TestUserCreation(t *testing.T) {
 	helpers.SetupTestDB()
 	defer helpers.CleanupTestDB()
 
-	// Inicializar o router
-	router := routes.SetupRoutes()
+	// Criar o roteador principal
+	r := mux.NewRouter()
+
+	// Setup das rotas
+	routes.SetupRoutes(r)
 
 	// Criar payload do usuário
 	user := models.User{
@@ -40,7 +46,7 @@ func TestUserCreation(t *testing.T) {
 	w := httptest.NewRecorder()
 
 	// Executar request
-	router.ServeHTTP(w, req)
+	r.ServeHTTP(w, req)
 
 	// Verificar status code
 	assert.Equal(t, http.StatusCreated, w.Code)
@@ -72,6 +78,12 @@ func TestUserLogin(t *testing.T) {
 
 	payload, _ := json.Marshal(loginPayload)
 
+	// Criar o roteador principal
+	r := mux.NewRouter()
+
+	// Setup das rotas
+	routes.SetupRoutes(r)
+
 	// Criar request
 	req := httptest.NewRequest("POST", "/login", bytes.NewBuffer(payload))
 	req.Header.Set("Content-Type", "application/json")
@@ -80,8 +92,7 @@ func TestUserLogin(t *testing.T) {
 	w := httptest.NewRecorder()
 
 	// Executar request
-	router := routes.SetupRoutes()
-	router.ServeHTTP(w, req)
+	r.ServeHTTP(w, req)
 
 	// Verificar status code
 	assert.Equal(t, http.StatusOK, w.Code)

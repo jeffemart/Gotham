@@ -178,7 +178,7 @@ func GetUser(w http.ResponseWriter, r *http.Request) {
 // @Param        page query int false "Número da página" default(1)
 // @Param        limit query int false "Itens por página" default(10)
 // @Success      200  {object}  models.PaginatedResponse
-// @Failure      500  {object}  ErrorResponse
+// @Failure 500 {object} models.ErrorResponse "Erro ao contar usuários"
 // @Router       /users [get]
 func GetUsers(w http.ResponseWriter, r *http.Request) {
 	// Pega os parâmetros de query (página e limite)
