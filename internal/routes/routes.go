@@ -6,6 +6,8 @@ import (
 	"github.com/jeffemart/Gotham/internal/middlewares"
 	"github.com/rs/cors"
 	httpSwagger "github.com/swaggo/http-swagger"
+	"net/http"
+	"github.com/jeffemart/Gotham/internal/models"
 )
 
 // SetupRoutes configura todas as rotas da aplicação
@@ -69,41 +71,27 @@ func SetupRoutes(r *mux.Router) {
 	// @Router /login [post]
 	r.HandleFunc("/login", handlers.Login).Methods("POST")
 
-	// Rotas protegidas (somente para administradores)
+	// Rotas protegidas com capacidades específicas
 	adminRoutes := r.PathPrefix("/admin").Subrouter()
 	adminRoutes.Use(middlewares.AuthMiddleware)
-	adminRoutes.Use(middlewares.RoleMiddleware("admin"))
+	
+	// Rotas de usuário com capacidades específicas
+	adminRoutes.Handle("/users/{id:[0-9]+}", 
+		middlewares.CapabilityMiddleware(models.CapabilityUpdateUser)(
+			http.HandlerFunc(handlers.UpdateUser),
+		)).Methods("PUT")
+	
+	adminRoutes.Handle("/users/{id:[0-9]+}", 
+		middlewares.CapabilityMiddleware(models.CapabilityDeleteUser)(
+			http.HandlerFunc(handlers.DeleteUser),
+		)).Methods("DELETE")
 
-	// @Summary Atualiza um usuário
-	// @Description Atualiza os dados de um usuário pelo ID
-	// @Tags admin
-	// @Param id path int true "ID do usuário"
-	// @Accept json
-	// @Produce json
-	// @Param user body map[string]interface{} true "Dados atualizados do usuário"
-	// @Success 200 {object} map[string]interface{}
-	// @Router /admin/users/{id} [put]
-	adminRoutes.HandleFunc("/users/{id:[0-9]+}", handlers.UpdateUser).Methods("PUT")
-
-	// @Summary Remove um usuário
-	// @Description Deleta um usuário pelo ID
-	// @Tags admin
-	// @Param id path int true "ID do usuário"
-	// @Produce json
-	// @Success 204 "No Content"
-	// @Router /admin/users/{id} [delete]
-	adminRoutes.HandleFunc("/users/{id:[0-9]+}", handlers.DeleteUser).Methods("DELETE")
-
-	// Rotas protegidas para usuários autenticados (admin ou agente)
+	// Rotas de tarefas
 	protectedRoutes := r.PathPrefix("/protected").Subrouter()
 	protectedRoutes.Use(middlewares.AuthMiddleware)
-	protectedRoutes.Use(middlewares.RoleMiddleware("admin", "agente"))
-
-	// @Summary Lista todas as tarefas
-	// @Description Retorna as tarefas disponíveis para o usuário autenticado
-	// @Tags protected
-	// @Produce json
-	// @Success 200 {array} map[string]interface{}
-	// @Router /protected/tasks [get]
-	protectedRoutes.HandleFunc("/tasks", handlers.GetTasks).Methods("GET")
+	
+	protectedRoutes.Handle("/tasks", 
+		middlewares.CapabilityMiddleware(models.CapabilityViewTasks)(
+			http.HandlerFunc(handlers.GetTasks),
+		)).Methods("GET")
 }
