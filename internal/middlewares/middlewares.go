@@ -102,3 +102,47 @@ func RoleMiddleware(roles ...string) mux.MiddlewareFunc {
 		})
 	}
 }
+
+// CapabilityMiddleware verifica se o usuário tem as capacidades necessárias
+func CapabilityMiddleware(requiredCapabilities ...string) mux.MiddlewareFunc {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			// Obter claims do contexto
+			claims, ok := r.Context().Value(utils.RoleKey).(*utils.Claims)
+			if !ok {
+				http.Error(w, "Erro ao obter informações do usuário", http.StatusInternalServerError)
+				return
+			}
+
+			// Recuperar a role do banco de dados
+			var role models.Role
+			if err := database.DB.First(&role, claims.RoleID).Error; err != nil {
+				http.Error(w, "Role não encontrada", http.StatusForbidden)
+				return
+			}
+
+			// Verificar se o usuário tem todas as capacidades necessárias
+			hasAllCapabilities := true
+			for _, requiredCap := range requiredCapabilities {
+				hasCapability := false
+				for _, userCap := range role.Capabilities {
+					if userCap == requiredCap || userCap == "*" { // "*" representa acesso total
+						hasCapability = true
+						break
+					}
+				}
+				if !hasCapability {
+					hasAllCapabilities = false
+					break
+				}
+			}
+
+			if !hasAllCapabilities {
+				http.Error(w, "Acesso negado: capacidades insuficientes", http.StatusForbidden)
+				return
+			}
+
+			next.ServeHTTP(w, r)
+		})
+	}
+}

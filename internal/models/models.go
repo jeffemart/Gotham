@@ -18,6 +18,7 @@ type Role struct {
 	ID          uint         `gorm:"primaryKey"`
 	Name        string       `gorm:"size:255;not null;unique"`
 	Permissions []Permission `gorm:"many2many:role_permissions"`
+	Capabilities []string    `gorm:"type:text[]"`
 }
 
 type Permission struct {
@@ -55,3 +56,14 @@ type ErrorResponse struct {
 	Status  int    `json:"status"`
 	Message string `json:"message"`
 }
+
+// Adicionar constantes para capacidades
+const (
+	CapabilityCreateUser    = "create:user"
+	CapabilityReadUser      = "read:user"
+	CapabilityUpdateUser    = "update:user"
+	CapabilityDeleteUser    = "delete:user"
+	CapabilityManageRoles   = "manage:roles"
+	CapabilityViewTasks     = "view:tasks"
+	CapabilityManageTasks   = "manage:tasks"
+)

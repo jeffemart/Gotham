@@ -19,12 +19,27 @@ func SeedDatabase() error {
 		database.DB.Create(&permission)
 	}
 
-	// Criar roles
+	// Criar roles com capacidades
 	adminRole := models.Role{
 		Name:        "admin",
 		Permissions: permissions,
+		Capabilities: []string{
+			"*", // Admin tem todas as capacidades
+		},
 	}
 	database.DB.Create(&adminRole)
+
+	agentRole := models.Role{
+		Name:        "agent",
+		Permissions: permissions,
+		Capabilities: []string{
+			models.CapabilityReadUser,
+			models.CapabilityUpdateUser,
+			models.CapabilityViewTasks,
+			models.CapabilityManageTasks,
+		},
+	}
+	database.DB.Create(&agentRole)
 
 	// Criar usuário admin
 	hashedPassword, _ := bcrypt.GenerateFromPassword([]byte("admin123"), bcrypt.DefaultCost)
